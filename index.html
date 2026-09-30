@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aggregation Sweep — Public Demo · SOETech Agent Fleet</title>
+<meta name="description" content="Public-safe demo console sweeping 24 synthetic unresolved items across mock domains — stale-glow aging, status pills, domain filters, and a persisted checkbox tally. Built by the SOETech agent fleet.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#05070d">
+<link rel="canonical" href="https://soeteam.github.io/aggregation-sweep-demo/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Aggregation Sweep — Public Demo">
+<meta property="og:description" content="24 synthetic unresolved items swept across mock domains — stale-glow aging, status pills, domain filters, persisted tick tally.">
+<meta property="og:url" content="https://soeteam.github.io/aggregation-sweep-demo/">
+<meta property="og:site_name" content="SOETech Agent Fleet Demos">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2305070d'/%3E%3Cpath d='M4 4h10v2H6v8H4zM18 4h10v10h-2V6h-8zM4 18h2v8h8v2H4zM28 18v10H18v-2h8v-8z' fill='%2300e5ff'/%3E%3C/svg%3E">
+<!-- Synthetic demo data only. No personal data. No internal mirrors. No auth. -->
+<style>
+:root{
+  --bg:#05070d;
+  --cyan:#00e5ff;
+  --magenta:#ff2ec4;
+  --yellow:#f8e71c;
+  --red:#ff3355;
+  --ink:rgba(226,236,250,.92);
+  --dim:rgba(148,166,196,.62);
+  --faint:rgba(148,166,196,.4);
+  --panel:rgba(10,17,30,.78);
+  --line:rgba(0,229,255,.16);
+  --mono:ui-monospace,'Cascadia Code','JetBrains Mono',Menlo,Consolas,'Liberation Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{color-scheme:dark}
+body{
+  font-family:var(--mono);
+  color:var(--ink);
+  background:
+    radial-gradient(1100px 560px at 72% -8%, rgba(0,229,255,.09), transparent 60%),
+    radial-gradient(880px 520px at 6% 108%, rgba(255,46,196,.08), transparent 60%),
+    var(--bg);
+  min-height:100vh;
+  padding:clamp(.8rem,3vw,2rem);
+  line-height:1.5;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,229,255,.035) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(90deg, rgba(0,229,255,.028) 0 1px, transparent 1px 48px);
+}
+.frame{
+  position:relative;max-width:1080px;margin:0 auto;z-index:1;
+  padding:clamp(1rem,3vw,1.8rem);
+  background:rgba(5,8,14,.62);border:1px solid var(--line);
+  backdrop-filter:blur(2px);
+}
+.corner{position:absolute;width:22px;height:22px;pointer-events:none;z-index:2}
+.corner.tl{top:-1px;left:-1px;border-top:2px solid var(--cyan);border-left:2px solid var(--cyan);box-shadow:0 0 14px rgba(0,229,255,.4)}
+.corner.tr{top:-1px;right:-1px;border-top:2px solid var(--cyan);border-right:2px solid var(--cyan);box-shadow:0 0 14px rgba(0,229,255,.4)}
+.corner.bl{bottom:-1px;left:-1px;border-bottom:2px solid var(--magenta);border-left:2px solid var(--magenta);box-shadow:0 0 14px rgba(255,46,196,.35)}
+.corner.br{bottom:-1px;right:-1px;border-bottom:2px solid var(--magenta);border-right:2px solid var(--magenta);box-shadow:0 0 14px rgba(255,46,196,.35)}
+
+header{display:flex;flex-direction:column;gap:.55rem;margin-bottom:.4rem}
+.brand{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap}
+.brand-mark{color:var(--magenta);letter-spacing:-.12em;font-size:1.05rem}
+h1{font-size:clamp(1.15rem,3.4vw,1.7rem);letter-spacing:.14em;color:var(--cyan);text-shadow:0 0 18px rgba(0,229,255,.45);font-weight:700}
+.tag{font-size:.62rem;letter-spacing:.16em;color:var(--yellow);border:1px solid rgba(248,231,28,.4);padding:.18rem .5rem;white-space:nowrap}
+.tag2{font-size:.62rem;letter-spacing:.16em;color:var(--faint);border:1px solid var(--line);padding:.18rem .5rem;white-space:nowrap}
+.sweepline{height:2px;background:rgba(0,229,255,.1);overflow:hidden;position:relative}
+.sweepline i{position:absolute;top:0;left:-35%;width:35%;height:100%;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:sweep 4.2s linear infinite}
+@keyframes sweep{to{left:135%}}
+.lede{color:var(--dim);font-size:.8rem;max-width:72ch}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin:.9rem 0 1rem}
+.stat{border:1px solid var(--line);background:var(--panel);padding:.6rem .7rem;position:relative}
+.stat .k{font-size:.6rem;letter-spacing:.14em;color:var(--faint)}
+.stat .v{font-size:1.35rem;font-weight:700;letter-spacing:.04em}
+.stat.total .v{color:var(--cyan)}
+.stat.red .v{color:var(--red)}
+.stat.yellow .v{color:var(--yellow)}
+.stat.tick .v{color:var(--magenta)}
+.stat::after{content:'';position:absolute;top:4px;right:4px;width:7px;height:7px;border-top:1px solid var(--cyan);border-right:1px solid var(--cyan);opacity:.45}
+
+.controls{display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:.8rem}
+.filters{display:flex;gap:.4rem;flex-wrap:wrap}
+.fbtn{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--dim);background:transparent;border:1px solid var(--line);padding:.4rem .7rem;cursor:pointer;transition:all .15s ease}
+.fbtn:hover{color:var(--cyan);border-color:rgba(0,229,255,.5)}
+.fbtn[aria-pressed="true"]{color:#05070d;background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 16px rgba(0,229,255,.4)}
+.fbtn .n{opacity:.65;margin-left:.3rem}
+.btn-reset{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;color:var(--magenta);background:transparent;border:1px solid rgba(255,46,196,.5);padding:.4rem .7rem;cursor:pointer;transition:all .15s ease}
+.btn-reset:hover{background:rgba(255,46,196,.12);box-shadow:0 0 14px rgba(255,46,196,.3)}
+
+.sweep{list-style:none;display:flex;flex-direction:column;gap:.45rem}
+.item{
+  display:grid;grid-template-columns:auto 7.2rem 1fr auto auto;
+  grid-template-areas:"box chip main pill age";
+  gap:.8rem;align-items:center;
+  border:1px solid var(--line);background:var(--panel);padding:.55rem .7rem;
+  transition:all .15s ease;
+}
+.item:hover{border-color:rgba(0,229,255,.4)}
+.item.stale-red{border-color:rgba(255,51,85,.5);box-shadow:inset 3px 0 0 var(--red),0 0 16px rgba(255,51,85,.14)}
+.item.stale-yellow{border-color:rgba(248,231,28,.4);box-shadow:inset 3px 0 0 var(--yellow),0 0 14px rgba(248,231,28,.1)}
+.item.ticked{opacity:.45}
+.item.ticked .name{text-decoration:line-through}
+.tickbox{grid-area:box;width:1.05rem;height:1.05rem;accent-color:var(--magenta);cursor:pointer}
+.dchip{grid-area:chip;font-size:.6rem;letter-spacing:.14em;color:var(--dim);border:1px solid var(--line);padding:.16rem .4rem;text-align:center;white-space:nowrap}
+.idcell{grid-area:main;min-width:0}
+.name{font-size:.86rem;color:var(--ink);letter-spacing:.02em;overflow-wrap:anywhere}
+.note{font-size:.7rem;color:var(--faint);overflow-wrap:anywhere}
+.pill{grid-area:pill;font-size:.62rem;letter-spacing:.14em;padding:.2rem .5rem;border:1px solid;white-space:nowrap}
+.pill.s-open{color:var(--cyan);border-color:rgba(0,229,255,.45)}
+.pill.s-pending{color:var(--yellow);border-color:rgba(248,231,28,.4)}
+.pill.s-blocked{color:var(--magenta);border-color:rgba(255,46,196,.5)}
+.pill.s-escalated{color:var(--red);border-color:rgba(255,51,85,.6)}
+.pill.s-waiting{color:var(--dim);border-color:rgba(148,166,196,.4)}
+.age{grid-area:age;font-size:.66rem;letter-spacing:.1em;padding:.2rem .45rem;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.age.stale-red{color:var(--red);border-color:rgba(255,51,85,.55);text-shadow:0 0 8px rgba(255,51,85,.5)}
+.age.stale-yellow{color:var(--yellow);border-color:rgba(248,231,28,.4)}
+.age.fresh{color:var(--cyan);border-color:rgba(0,229,255,.4)}
+
+.empty{color:var(--dim);font-size:.75rem;letter-spacing:.1em;padding:1rem;border:1px dashed var(--line);text-align:center}
+footer{margin-top:1.2rem;border-top:1px solid var(--line);padding-top:.8rem;display:flex;flex-direction:column;gap:.3rem}
+.proof{font-size:.72rem;color:var(--dim)}
+.proof b{color:var(--cyan);font-weight:600}
+.prov{font-size:.66rem;letter-spacing:.1em;color:var(--yellow)}
+.canon{font-size:.64rem;color:var(--faint)}
+.canon a{color:var(--cyan);text-decoration:none;border-bottom:1px dotted rgba(0,229,255,.4)}
+.canon a:hover{color:#8ff3ff}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+@media (max-width:760px){
+  .item{grid-template-columns:auto 1fr auto;grid-template-areas:"box main pill" "box chip age";gap:.5rem .7rem}
+}
+@media (prefers-reduced-motion:reduce){.sweepline i{animation:none;display:none}}
+</style>
+</head>
+<body>
+<div class="frame">
+  <span class="corner tl" aria-hidden="true"></span><span class="corner tr" aria-hidden="true"></span>
+  <span class="corner bl" aria-hidden="true"></span><span class="corner br" aria-hidden="true"></span>
+
+  <header>
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">▞▚</span>
+      <h1>AGGREGATION SWEEP</h1>
+      <span class="tag">PUBLIC DEMO · SYNTHETIC DATA ONLY</span>
+      <span class="tag2">CYCLE 2026-09-30 · AGING CLOCK: SYNTHETIC</span>
+    </div>
+    <div class="sweepline" aria-hidden="true"><i></i></div>
+    <p class="lede">Cross-domain unresolved-item sweep console. Every row below is invented-for-demo data aged by a synthetic clock — a live internal counterpart would aggregate the same shape across real domains.</p>
+  </header>
+
+  <section class="stats" aria-label="Sweep statistics">
+    <div class="stat total"><div class="k">TOTAL ITEMS</div><div class="v" id="stat-total">–</div></div>
+    <div class="stat red"><div class="k">RED STALE &gt;7D</div><div class="v" id="stat-red">–</div></div>
+    <div class="stat yellow"><div class="k">YELLOW STALE 3–7D</div><div class="v" id="stat-yellow">–</div></div>
+    <div class="stat tick"><div class="k">TICKED</div><div class="v" id="stat-tick">–</div></div>
+    <div class="stat scope"><div class="k">IN SCOPE</div><div class="v" id="stat-scope">–</div></div>
+  </section>
+
+  <section class="controls">
+    <div class="filters" id="filters" role="group" aria-label="Domain filters"></div>
+    <button id="reset" class="btn-reset" type="button">RESET TICKS</button>
+  </section>
+
+  <main>
+    <noscript><p class="empty">This demo needs JavaScript for the interactive sweep view.</p></noscript>
+    <ul id="sweep" class="sweep"></ul>
+    <p id="empty" class="empty" hidden>NO ITEMS IN THIS DOMAIN WINDOW</p>
+  </main>
+
+  <footer>
+    <p class="proof">This demo shows <b>multi-domain aggregation with stale-detection heuristics and persisted client state</b> — built by the SOETech agent fleet. Every item, age, and status is fabricated for demonstration only; nothing here mirrors real operations.</p>
+    <p class="prov">Built by the SOETech agent fleet · synthetic demo data · 2026-09-30</p>
+    <p class="canon">Canonical: <a href="https://soeteam.github.io/aggregation-sweep-demo/">soeteam.github.io/aggregation-sweep-demo</a></p>
+  </footer>
+</div>
+
+<script>
+'use strict';
+/* Aggregation Sweep — public demo. All data below is synthetic, invented for this demo. */
+var ITEMS = [
+  {id:'proj-orion-refactor',            domain:'projects', status:'OPEN',      age:12, note:'compiler module split pending review window'},
+  {id:'proj-vesper-migrate',            domain:'projects', status:'BLOCKED',   age:21, note:'legacy schema handoff waiting on fixture bundle'},
+  {id:'proj-halcyon-cache',             domain:'projects', status:'OPEN',      age:5,  note:'warm-cache pass staged for next cycle'},
+  {id:'proj-tessera-compile',           domain:'projects', status:'OPEN',      age:2,  note:'build graph rerun queued'},
+  {id:'proj-quasar-docgen',             domain:'projects', status:'PENDING',   age:9,  note:'sample outputs awaiting sign-off sweep'},
+  {id:'proj-nimbus-release',            domain:'projects', status:'WAITING',   age:4,  note:'tag cut held for regression tally'},
+  {id:'fleet-agent-vega-heartbeat',     domain:'fleet',    status:'ESCALATED', age:15, note:'heartbeat gap flagged during last aggregation'},
+  {id:'fleet-agent-lyra-token-drift',   domain:'fleet',    status:'OPEN',      age:6,  note:'token budget drifting past soft ceiling'},
+  {id:'fleet-relay-delta-queue',        domain:'fleet',    status:'OPEN',      age:3,  note:'queue depth nominal, drain scheduled'},
+  {id:'fleet-agent-rho-crashloop',      domain:'fleet',    status:'BLOCKED',   age:18, note:'restart loop needs a clean shim'},
+  {id:'fleet-cron-nova-silence',        domain:'fleet',    status:'ESCALATED', age:11, note:'cron silent for two cycles'},
+  {id:'fleet-agent-castor-retry-pile',  domain:'fleet',    status:'PENDING',   age:1,  note:'retry pile within tolerance'},
+  {id:'bill-alpha-power-utility',       domain:'bills',    status:'WAITING',   age:8,  note:'statement posted, autopay window open'},
+  {id:'bill-gamma-cloud-invoice',       domain:'bills',    status:'PENDING',   age:6,  note:'invoice downloaded, not yet tallied'},
+  {id:'bill-delta-insurance-quote',     domain:'bills',    status:'OPEN',      age:13, note:'renewal quote aging past reminder'},
+  {id:'bill-sigma-domain-renewal',      domain:'bills',    status:'OPEN',      age:2,  note:'renewal scheduled, ledger updated'},
+  {id:'bill-theta-software-license',    domain:'bills',    status:'BLOCKED',   age:10, note:'seat count mismatch under review'},
+  {id:'bill-kappa-parking-citation',    domain:'bills',    status:'WAITING',   age:4,  note:'dispute letter drafted'},
+  {id:'goal-run-streak-45',             domain:'goals',    status:'OPEN',      age:5,  note:'streak log two entries behind'},
+  {id:'goal-read-queue-cull',           domain:'goals',    status:'OPEN',      age:7,  note:'queue holding steady at cap'},
+  {id:'goal-budget-buffer-15pct',       domain:'goals',    status:'PENDING',   age:9,  note:'buffer drift logged mid-cycle'},
+  {id:'goal-garage-shelf-build',        domain:'goals',    status:'OPEN',      age:16, note:'materials staged, build window unscheduled'},
+  {id:'goal-language-drill-weekly',     domain:'goals',    status:'OPEN',      age:3,  note:'drill cadence holding'},
+  {id:'goal-sleep-anchor-2330',         domain:'goals',    status:'WAITING',   age:1,  note:'anchor holding within window'}
+];
+var DOMAINS = ['projects','fleet','bills','goals'];
+var LS_KEY = 'aggregation-sweep-demo:ticks:v1';
+var RED_AFTER = 7;   // strictly greater than this many days -> red glow
+var YELLOW_FROM = 3; // 3..7 days -> yellow glow
+
+function staleness(age){
+  if (age > RED_AFTER) return 'red';
+  if (age >= YELLOW_FROM) return 'yellow';
+  return 'none';
+}
+
+var ticks = loadTicks();
+var activeDomain = 'all';
+
+function loadTicks(){
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (!raw) return new Set();
+    var parsed = JSON.parse(raw);
+    var today = new Date().toISOString().slice(0, 10);
+    if (!parsed || parsed.day !== today || !Array.isArray(parsed.ticks)) return new Set();
+    return new Set(parsed.ticks.filter(function (t) {
+      return ITEMS.some(function (i) { return i.id === t; });
+    }));
+  } catch (err) { return new Set(); }
+}
+function saveTicks(){
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      day: new Date().toISOString().slice(0, 10),
+      ticks: Array.from(ticks)
+    }));
+  } catch (err) { /* storage unavailable — demo keeps working in-memory */ }
+}
+
+function el(tag, cls, text){
+  var node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function visibleItems(){
+  return ITEMS.filter(function (it) {
+    return activeDomain === 'all' || it.domain === activeDomain;
+  });
+}
+
+function renderFilters(){
+  var wrap = document.getElementById('filters');
+  wrap.textContent = '';
+  var defs = [{ key:'all', label:'ALL', count:ITEMS.length }].concat(DOMAINS.map(function (d) {
+    return { key:d, label:d.toUpperCase(), count:ITEMS.filter(function (i) { return i.domain === d; }).length };
+  }));
+  defs.forEach(function (def) {
+    var btn = el('button', 'fbtn');
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', String(def.key === activeDomain));
+    btn.appendChild(el('span', null, def.label));
+    btn.appendChild(el('span', 'n', '[' + def.count + ']'));
+    btn.addEventListener('click', function () {
+      activeDomain = def.key;
+      renderFilters();
+      renderList();
+      renderStats();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function setStat(id, value){
+  var node = document.getElementById(id);
+  if (node) node.textContent = String(value);
+}
+
+function renderStats(){
+  var red = ITEMS.filter(function (i) { return staleness(i.age) === 'red'; }).length;
+  var yellow = ITEMS.filter(function (i) { return staleness(i.age) === 'yellow'; }).length;
+  var ticked = ITEMS.filter(function (i) { return ticks.has(i.id); }).length;
+  setStat('stat-total', ITEMS.length);
+  setStat('stat-red', red);
+  setStat('stat-yellow', yellow);
+  setStat('stat-tick', ticked);
+  setStat('stat-scope', visibleItems().length + '/' + ITEMS.length);
+}
+
+function renderList(){
+  var list = document.getElementById('sweep');
+  list.textContent = '';
+  var items = visibleItems();
+  document.getElementById('empty').hidden = items.length > 0;
+  items.forEach(function (it) {
+    var st = staleness(it.age);
+    var li = el('li', 'item' + (st !== 'none' ? ' stale-' + st : '') + (ticks.has(it.id) ? ' ticked' : ''));
+    var box = document.createElement('input');
+    box.type = 'checkbox';
+    box.className = 'tickbox';
+    box.checked = ticks.has(it.id);
+    box.setAttribute('aria-label', 'Tick item ' + it.id);
+    box.addEventListener('change', function () {
+      if (box.checked) { ticks.add(it.id); } else { ticks.delete(it.id); }
+      saveTicks();
+      li.classList.toggle('ticked', box.checked);
+      renderStats();
+    });
+    li.appendChild(box);
+    li.appendChild(el('span', 'dchip', it.domain.toUpperCase()));
+    var idcell = el('div', 'idcell');
+    idcell.appendChild(el('div', 'name', it.id));
+    idcell.appendChild(el('div', 'note', it.note));
+    li.appendChild(idcell);
+    li.appendChild(el('span', 'pill s-' + it.status.toLowerCase(), it.status));
+    var ageCls = st === 'red' ? 'stale-red' : st === 'yellow' ? 'stale-yellow' : 'fresh';
+    li.appendChild(el('span', 'age ' + ageCls, 'AGE ' + String(it.age).padStart(2, '0') + 'D'));
+    list.appendChild(li);
+  });
+}
+
+document.getElementById('reset').addEventListener('click', function () {
+  ticks.clear();
+  saveTicks();
+  renderStats();
+  renderList();
+});
+
+renderFilters();
+renderStats();
+renderList();
+</script>
+</body>
+</html>
